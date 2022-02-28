@@ -3,8 +3,8 @@ Description=SRS Callback Server
 
 [Service]
 Type=simple
-EnvironmentFile=/etc/srs/srs-callback-server.conf
-ExecStart=/usr/local/src/srs-callback-server/server.py
+EnvironmentFile=/etc/src/sbf/srs-backend-server.conf
+ExecStart=/usr/local/src/sbf/srs-backend-server/server.py
 Restart=always
 
 DynamicUser=yes

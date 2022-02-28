@@ -7,7 +7,7 @@ import os
 from netaddr import IPNetwork, IPAddress
 from systemd.journal import JournalHandler
 
-log = logging.getLogger('srs-callback-handler')
+log = logging.getLogger('srs-backend-handler')
 log.addHandler(JournalHandler())
 log.setLevel(logging.INFO)
 
@@ -18,17 +18,17 @@ class Error:
     system_parse_subnet = 200
 
 try:
-    bind_ip = os.environ['SRS_CALLBACK_SERVER_BIND_IP']
+    bind_ip = os.environ['SRS_BACKEND_SERVER_BIND_IP']
 except KeyError:
     bind_ip = "127.0.0.1"
 
 try:
-    bind_port = int(os.environ['SRS_CALLBACK_SERVER_BIND_PORT'])
+    bind_port = int(os.environ['SRS_BACKEND_SERVER_BIND_PORT'])
 except KeyError:
     bind_port = 59354
 
 try:
-    tokens_json = os.environ['SRS_CALLBACK_SERVER_ALLOWED_TOKENS']
+    tokens_json = os.environ['SRS_BACKEND_SERVER_ALLOWED_TOKENS']
     tokens = json.loads(tokens_json)
     tokens = [f'?token={token}' for token in tokens]
 except KeyError:
@@ -38,7 +38,7 @@ except Exception:
     os._exit(Error.system_parse_json)
 
 try:
-    allowed_subnet = os.environ['SRS_CALLBACK_SERVER_ALLOWED_SUBNET_MASK']
+    allowed_subnet = os.environ['SRS_BACKEND_SERVER_ALLOWED_SUBNET_MASK']
     allowed_subnet = IPNetwork(allowed_subnet)
 except KeyError:
     allowed_subnet = None
@@ -50,14 +50,14 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         code = Error.success
 
-        try:
-            content_len = int(self.headers.get('Content-Length'))
-            post_body = self.rfile.read(content_len)
-            json_data=json.loads(post_body)
-        except Exception:
-            code = Error.system_parse_json
-            log.error('Failed to parse JSON')
-            log.error(post_body)
+        content_len = int(self.headers.get('Content-Length'))
+        with self.rfile.read(content_len) as post_body:
+            try:
+                json_data = json.loads(post_body)
+            except Exception:
+                code = Error.system_parse_json
+                log.error('Failed to parse JSON')
+                log.error(post_body)
 
         """ json_data example:
         {
