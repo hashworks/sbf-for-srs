@@ -3,7 +3,7 @@ Description=SRS
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/srs -c /etc/srs/config.conf
+ExecStart=/usr/bin/srs -c /etc/srs/srs.conf
 Restart=always
 
 DynamicUser=yes

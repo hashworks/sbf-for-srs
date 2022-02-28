@@ -3,7 +3,7 @@ Description=SRS Callback Server
 
 [Service]
 Type=simple
-EnvironmentFile=/etc/src/sbf/srs-backend-server.conf
+EnvironmentFile=/etc/src/srs-backend-server.conf
 ExecStart=/usr/local/src/sbf/srs-backend-server/server.py
 Restart=always
 
