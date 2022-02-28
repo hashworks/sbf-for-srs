@@ -1,0 +1,2 @@
+systemd==0.16.*
+netaddr==0.8.*

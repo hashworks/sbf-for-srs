@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "mpegts.js": "^1.6.5"
+  }
+}

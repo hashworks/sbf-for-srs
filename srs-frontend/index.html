@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang=en>
+<title>Livestream</title>
+<script src="node_modules/mpegts.js/dist/mpegts.js"></script>
+<div style="text-align: center">
+    <div id="mpvNote"></div>
+    </br>
+    <video controls autoplay muted width="80%" height="80%" id="videoElement"></video>
+</div>
+<script>
+    var stream_key = 'public'
+    if (window.location.hash) {
+        stream_key = window.location.hash.substring(1);
+    }
+    var url = 'live/' + stream_key + '.flv';
+    document.getElementById('mpvNote').innerHTML = 'mpv https://' + window.location.hostname + '/' + url;
+    if (mpegts.getFeatureList().mseLivePlayback) {
+        var video_element = document.getElementById('videoElement');
+        var player = mpegts.createPlayer({
+            type: 'flv',
+            isLive: true,
+            liveBufferLatencyChasing: true,
+            url: url
+        });
+        player.attachMediaElement(video_element);
+        player.load();
+        player.play();
+    }
+</script>
