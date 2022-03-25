@@ -51,13 +51,13 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         code = Error.success
 
         content_len = int(self.headers.get('Content-Length'))
-        with self.rfile.read(content_len) as post_body:
-            try:
-                json_data = json.loads(post_body)
-            except Exception:
-                code = Error.system_parse_json
-                log.error('Failed to parse JSON')
-                log.error(post_body)
+        post_body = self.rfile.read(content_len)
+        try:
+            json_data = json.loads(post_body)
+        except Exception:
+            code = Error.system_parse_json
+            log.error('Failed to parse JSON')
+            log.error(post_body)
 
         """ json_data example:
         {
@@ -73,7 +73,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         """
 
         if json_data['action'] == 'on_publish' and \
-            (allowed_subnet != None and not IPAddress(json_data['ip']) in allowed_subnet) and \
+            (allowed_subnet != None and IPAddress(json_data['ip']) not in allowed_subnet) and \
             json_data['param'] not in tokens:
                 log.info("Denying access")
                 log.info(json_data)
