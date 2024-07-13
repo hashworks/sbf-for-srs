@@ -6,6 +6,7 @@ import logging
 import os
 from netaddr import IPNetwork, IPAddress
 from systemd.journal import JournalHandler
+from urllib.parse import urlparse, parse_qs
 
 log = logging.getLogger('srs-backend-handler')
 log.addHandler(JournalHandler())
@@ -30,7 +31,6 @@ except KeyError:
 try:
     tokens_json = os.environ['SRS_BACKEND_SERVER_ALLOWED_TOKENS']
     tokens = json.loads(tokens_json)
-    tokens = [f'?token={token}' for token in tokens]
 except KeyError:
     tokens = []
 except Exception:
@@ -72,9 +72,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         }
         """
 
+        # Known bug: param is doubled (`?token=foo?token=foo`), so we parse tcUrl instead
+
+        tc_url = json_data['tcUrl']
+        parsed_url = urlparse(tc_url)
+        query_params = parse_qs(parsed_url.query)
+        token = query_params.get('token', [None])[0]
+
         if json_data['action'] == 'on_publish' and \
             (allowed_subnet != None and IPAddress(json_data['ip']) not in allowed_subnet) and \
-            json_data['param'] not in tokens:
+            token not in tokens:
                 log.info("Denying access")
                 log.info(json_data)
                 code = Error.failure
